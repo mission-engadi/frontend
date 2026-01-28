@@ -21,7 +21,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { apiClient, serviceUrls } from '@/src/config/api';
+import { aiApi } from '@/lib/api-clients';
 import {
   BarChart,
   Bar,
@@ -61,43 +61,39 @@ export default function CostMonitoringPage() {
     try {
       setRefreshing(true);
 
-      // TODO: Replace with actual API endpoint
-      // For now, using mock data
-      const mockData: CostData = {
-        dailyCost: 12.45,
-        weeklyCost: 78.30,
-        monthlyCost: 289.75,
-        dailyBudget: 100,
-        alertThreshold: 80,
-        costByProvider: [
-          { name: 'Groq', cost: 2.35, color: '#0088FE' },
-          { name: 'Claude', cost: 4.80, color: '#00C49F' },
-          { name: 'GPT-4o', cost: 3.20, color: '#FFBB28' },
-          { name: 'fal.ai', cost: 1.50, color: '#FF8042' },
-          { name: 'ElevenLabs', cost: 0.60, color: '#8884D8' },
-        ],
-        costByAgent: [
-          { name: 'Scraping', cost: 2.10 },
-          { name: 'Validation', cost: 4.50 },
-          { name: 'Budget', cost: 3.05 },
-          { name: 'PM Agent', cost: 2.80 },
-        ],
-        dailyTrend: [
-          { date: '2026-01-10', cost: 10.20 },
-          { date: '2026-01-11', cost: 11.50 },
-          { date: '2026-01-12', cost: 9.80 },
-          { date: '2026-01-13', cost: 13.20 },
-          { date: '2026-01-14', cost: 12.10 },
-          { date: '2026-01-15', cost: 11.90 },
-          { date: '2026-01-16', cost: 12.45 },
-        ],
-      };
+      // Fetch cost data from real API endpoints
+      const [budgetResponse, reportResponse, providerResponse, agentResponse, trendResponse] = await Promise.all([
+        aiApi.get('/admin/cost/budget'),
+        aiApi.get('/admin/cost/report?days=7'),
+        aiApi.get('/admin/cost/by-provider?days=1'),
+        aiApi.get('/admin/cost/by-agent?days=1'),
+        aiApi.get('/admin/cost/trend?days=7'),
+      ]);
 
-      setCostData(mockData);
+      const budget = budgetResponse.data;
+      const report = reportResponse.data;
+      const providers = providerResponse.data;
+      const agents = agentResponse.data;
+      const trend = trendResponse.data;
+
+      setCostData({
+        dailyCost: budget.current_spending || 0,
+        weeklyCost: report.totals?.cost || 0,
+        monthlyCost: (report.totals?.cost || 0) * 4.3, // Approximate monthly from weekly
+        dailyBudget: budget.daily_budget || 100,
+        alertThreshold: budget.alert_threshold || 80,
+        costByProvider: providers.providers || [],
+        costByAgent: agents.agents || [],
+        dailyTrend: trend.trend || [],
+      });
       setError(null);
     } catch (err: any) {
       console.error('Error fetching cost data:', err);
-      setError(err.response?.data?.detail || 'Failed to fetch cost data');
+      if (err.response?.status === 404) {
+        setError('Cost monitoring endpoints are not yet implemented in the AI service. This feature is coming soon!');
+      } else {
+        setError(err.response?.data?.detail || 'Failed to fetch cost data');
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -139,6 +135,7 @@ export default function CostMonitoringPage() {
   const isOverBudget = budgetUsagePercent >= 100;
 
   const totalDailyCost = costData.costByProvider.reduce((sum, p) => sum + p.cost, 0);
+  const hasNoData = costData.dailyCost === 0 && costData.weeklyCost === 0;
 
   return (
     <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
@@ -163,7 +160,12 @@ export default function CostMonitoringPage() {
       </Box>
 
       {/* Budget Alert */}
-      {isOverThreshold && (
+      {hasNoData && (
+        <Alert severity="info" sx={{ mb: 3 }}>
+          No AI usage recorded yet. Cost monitoring will begin tracking once you start using AI features.
+        </Alert>
+      )}
+      {!hasNoData && isOverThreshold && (
         <Alert severity={isOverBudget ? 'error' : 'warning'} icon={<AlertCircle />} sx={{ mb: 3 }}>
           {isOverBudget
             ? `Daily budget exceeded! Current: $${costData.dailyCost.toFixed(2)} / Budget: $${costData.dailyBudget.toFixed(2)}`
@@ -291,10 +293,10 @@ export default function CostMonitoringPage() {
                     dataKey="cost"
                   >
                     {costData.costByProvider.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      <Cell key={`cell-${index}`} fill={entry.color || COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value: number) => `$${value.toFixed(2)}`} />
+                  <Tooltip formatter={(value) => `$${Number(value || 0).toFixed(2)}`} />
                 </PieChart>
               </ResponsiveContainer>
             </CardContent>
@@ -313,7 +315,7 @@ export default function CostMonitoringPage() {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
                   <YAxis />
-                  <Tooltip formatter={(value: number) => `$${value.toFixed(2)}`} />
+                  <Tooltip formatter={(value) => `$${Number(value || 0).toFixed(2)}`} />
                   <Bar dataKey="cost" fill="#0088FE" radius={[8, 8, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
@@ -333,7 +335,7 @@ export default function CostMonitoringPage() {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" />
                   <YAxis />
-                  <Tooltip formatter={(value: number) => `$${value.toFixed(2)}`} />
+                  <Tooltip formatter={(value) => `$${Number(value || 0).toFixed(2)}`} />
                   <Legend />
                   <Line type="monotone" dataKey="cost" stroke="#0088FE" strokeWidth={2} dot={{ r: 4 }} />
                 </LineChart>

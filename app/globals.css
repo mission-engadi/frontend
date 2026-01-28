@@ -1,8 +1,63 @@
 @import "tailwindcss";
 
+/**
+ * Neo-Brutalist Design System - Global Styles
+ *
+ * Core characteristics:
+ * - Bold, high-contrast colors
+ * - Hard-edged shadows (no blur)
+ * - Thick borders (2-4px)
+ * - Sharp corners (0-4px max)
+ * - Strong typography
+ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Neo-Brutalist Color Palette */
+  --color-electric-blue: #0066FF;
+  --color-hot-pink: #FF1493;
+  --color-acid-yellow: #DFFF00;
+  --color-bright-orange: #FF6B00;
+  --color-mint-green: #00FF7F;
+
+  /* Neutral Colors */
+  --color-pure-white: #FFFFFF;
+  --color-jet-black: #000000;
+  --color-off-white: #F5F5F5;
+  --color-dark-gray: #1A1A1A;
+  --color-medium-gray: #333333;
+
+  /* Semantic Colors */
+  --color-success: #00CC66;
+  --color-warning: #FFAA00;
+  --color-error: #FF3333;
+  --color-info: #0099FF;
+
+  /* Light Theme */
+  --background: var(--color-off-white);
+  --foreground: var(--color-jet-black);
+  --surface: var(--color-pure-white);
+  --border: var(--color-jet-black);
+
+  /* Shadows */
+  --shadow-small: 4px 4px 0px var(--color-jet-black);
+  --shadow-medium: 6px 6px 0px var(--color-jet-black);
+  --shadow-large: 8px 8px 0px var(--color-jet-black);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: var(--color-dark-gray);
+    --foreground: var(--color-pure-white);
+    --surface: var(--color-medium-gray);
+    --border: var(--color-jet-black);
+    /* Improved text.secondary for dark mode - WCAG AA compliant */
+    --text-secondary: #CCCCCC;
+  }
+}
+
+/* Light mode text secondary - WCAG AA compliant */
+:root {
+  --text-secondary: #444444;
 }
 
 @theme inline {
@@ -12,15 +67,170 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  line-height: 1.6;
+}
+
+/* Neo-Brutalist Selection */
+::selection {
+  background-color: var(--color-acid-yellow);
+  color: var(--color-jet-black);
+}
+
+/* Neo-Brutalist Focus States */
+:focus-visible {
+  outline: 3px solid var(--color-electric-blue);
+  outline-offset: 2px;
+}
+
+/* Neo-Brutalist Links */
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.1s ease;
+}
+
+a:hover {
+  color: var(--color-electric-blue);
+}
+
+/* Neo-Brutalist Scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+  border-left: 2px solid var(--border);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-medium-gray);
+  border: 2px solid var(--border);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-electric-blue);
+}
+
+/* Neo-Brutalist Utility Classes */
+.neo-card {
+  background: var(--surface);
+  border: 3px solid var(--border);
+  box-shadow: var(--shadow-medium);
+}
+
+.neo-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-large);
+}
+
+.neo-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  font-weight: 700;
+  border: 3px solid var(--border);
+  box-shadow: var(--shadow-small);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  cursor: pointer;
+}
+
+.neo-button:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px var(--border);
+}
+
+.neo-button:active {
+  transform: translate(4px, 4px);
+  box-shadow: none;
+}
+
+.neo-button-primary {
+  background: var(--color-electric-blue);
+  color: var(--color-pure-white);
+}
+
+.neo-button-secondary {
+  background: var(--color-hot-pink);
+  color: var(--color-pure-white);
+}
+
+.neo-input {
+  padding: 12px 16px;
+  font-weight: 500;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  transition: border-color 0.1s ease, box-shadow 0.1s ease;
+}
+
+.neo-input:hover {
+  border-width: 3px;
+}
+
+.neo-input:focus {
+  border-color: var(--color-electric-blue);
+  box-shadow: 3px 3px 0px var(--color-electric-blue);
+  outline: none;
+}
+
+.neo-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 2px solid var(--border);
+}
+
+.neo-badge-success {
+  background: var(--color-success);
+  color: var(--color-jet-black);
+}
+
+.neo-badge-warning {
+  background: var(--color-warning);
+  color: var(--color-jet-black);
+}
+
+.neo-badge-error {
+  background: var(--color-error);
+  color: var(--color-pure-white);
+}
+
+.neo-badge-info {
+  background: var(--color-info);
+  color: var(--color-pure-white);
+}
+
+/* Typography Utilities */
+.font-black {
+  font-weight: 900;
+}
+
+.tracking-tight {
+  letter-spacing: -0.02em;
+}
+
+.uppercase-label {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  font-size: 0.75rem;
 }
