@@ -14,3 +14,6 @@ export { partnersApi, donationsApi } from './partners';
 export { contentApi } from './content';
 export { campaignsApi, postsApi } from './campaigns';
 export { analyticsApi } from './analytics';
+
+// Export health check
+export { checkHealth } from '../../lib/api';
