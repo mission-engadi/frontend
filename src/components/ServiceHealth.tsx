@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { checkHealth } from '@/lib/api';
+import { checkHealth } from '../../lib/api';
 import { Activity, Server, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 
 /**

@@ -1,7 +1,7 @@
 'use client';
 
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter';
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v16-appRouter';
 import { ReactNode, useMemo } from 'react';
 import { useUIStore } from '@/src/stores/uiStore';
 
@@ -104,7 +104,7 @@ export function MUIThemeProvider({ children }: MUIThemeProviderProps) {
 
         typography: {
           fontFamily: [
-            'Inter',
+            'Geist',
             '-apple-system',
             'BlinkMacSystemFont',
             '"Segoe UI"',
